@@ -1,5 +1,5 @@
 provider "aws" {
-  region = "eu-west-1"
+  region = "eu-west-2"
 }
 
 resource "aws_vpc" "tee_vpc" {
@@ -14,7 +14,7 @@ resource "aws_subnet" "tee_subnet" {
   count = 2
   vpc_id                  = aws_vpc.tee_vpc.id
   cidr_block              = cidrsubnet(aws_vpc.tee_vpc.cidr_block, 8, count.index)
-  availability_zone       = element(["eu-west-1a", "eu-west-1b"], count.index)
+  availability_zone       = element(["eu-west-2a", "eu-west-2b"], count.index)
   map_public_ip_on_launch = true
 
   tags = {
@@ -68,8 +68,8 @@ resource "aws_security_group" "tee_node_sg" {
   vpc_id = aws_vpc.tee_vpc.id
 
   ingress {
-    from_port   = 0
-    to_port     = 0
+    from_port   = 25
+    to_port     = 25
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
@@ -103,9 +103,9 @@ resource "aws_eks_node_group" "tee" {
   subnet_ids      = aws_subnet.tee_subnet[*].id
 
   scaling_config {
-    desired_size = 3
+    desired_size = 2
     max_size     = 3
-    min_size     = 3
+    min_size     = 1
   }
 
   instance_types = ["t2.medium"]
